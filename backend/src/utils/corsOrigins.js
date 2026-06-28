@@ -6,16 +6,14 @@ const DEFAULT_LOCAL_ORIGINS = [
 ];
 
 const normalizeOrigin = (origin) => {
-  if (!origin) {
-    return "";
-  }
-
+  if (!origin) return "";
   return origin.trim().replace(/\/$/, "");
 };
 
 const splitOrigins = (origins = "") => {
   return origins
     .split(",")
+    .map((o) => o.trim())
     .map(normalizeOrigin)
     .filter(Boolean);
 };
@@ -29,11 +27,19 @@ const getAllowedOrigins = (env = process.env) => {
 };
 
 const isAllowedOrigin = (origin, allowedOrigins) => {
-  if (!origin) {
-    return true;
+  if (!origin) return true;
+
+  const normalized = normalizeOrigin(origin);
+
+  const allowed = allowedOrigins.some((allowed) =>
+    normalized === allowed || normalized.startsWith(allowed)
+  );
+
+  if (!allowed) {
+    console.warn("[CORS BLOCKED]:", normalized);
   }
 
-  return allowedOrigins.includes(normalizeOrigin(origin));
+  return allowed;
 };
 
 module.exports = {
