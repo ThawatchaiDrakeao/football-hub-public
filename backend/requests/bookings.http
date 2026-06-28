@@ -1,0 +1,96 @@
+@baseUrl = http://localhost:5000
+@email = fong@test.com
+@password = 123456
+
+# Optional manual test:
+# Create a field first, then replace this with the field _id if you do not use createField below.
+# @fieldId = replace_with_created_field_id
+
+### Login
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Create field for booking test - admin only
+# @name createField
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "REST Client Booking Arena {{$timestamp}}",
+  "location": "Bangkok",
+  "description": "Field created only for booking API testing.",
+  "pricePerHour": 1000,
+  "fieldType": "7-a-side",
+  "openTime": "10:00",
+  "closeTime": "23:00",
+  "facilities": ["parking", "shower", "water"]
+}
+
+### Create booking - logged in user
+# @name createBooking
+POST {{baseUrl}}/api/bookings
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "field": "{{createField.response.body._id}}",
+  "date": "2026-06-01",
+  "startTime": "18:00",
+  "endTime": "20:00"
+}
+
+### Try conflict booking - should return 409
+POST {{baseUrl}}/api/bookings
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "field": "{{createField.response.body._id}}",
+  "date": "2026-06-01",
+  "startTime": "19:00",
+  "endTime": "21:00"
+}
+
+### Create non-conflicting booking - should pass
+POST {{baseUrl}}/api/bookings
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "field": "{{createField.response.body._id}}",
+  "date": "2026-06-01",
+  "startTime": "20:00",
+  "endTime": "21:00"
+}
+
+### Get my bookings - logged in user
+GET {{baseUrl}}/api/bookings/my-bookings
+Authorization: Bearer {{login.response.body.token}}
+
+### Get booking by id - owner or admin
+GET {{baseUrl}}/api/bookings/{{createBooking.response.body._id}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Get all bookings - admin only
+GET {{baseUrl}}/api/bookings
+Authorization: Bearer {{login.response.body.token}}
+
+### Update booking status - admin only
+PATCH {{baseUrl}}/api/bookings/{{createBooking.response.body._id}}/status
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "status": "confirmed"
+}
+
+### Cancel own booking - logged in user
+PATCH {{baseUrl}}/api/bookings/{{createBooking.response.body._id}}/cancel
+Authorization: Bearer {{login.response.body.token}}

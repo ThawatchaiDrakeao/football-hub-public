@@ -1,0 +1,121 @@
+@baseUrl = http://localhost:5000
+@email = fong@test.com
+@password = 123456
+@memberName = Community Member {{$timestamp}}
+@memberEmail = community.member.{{$timestamp}}@test.com
+@memberPassword = 123456
+
+# Optional manual test:
+# After creating a community post or join request, copy its _id here if you do not use response variables.
+# @postId = replace_with_created_community_post_id
+# @joinRequestId = replace_with_created_join_request_id
+
+### Login as post owner/admin
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Register another user for join request testing
+# @name registerMember
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{memberName}}",
+  "email": "{{memberEmail}}",
+  "password": "{{memberPassword}}"
+}
+
+### Member login
+# @name memberLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{memberEmail}}",
+  "password": "{{memberPassword}}"
+}
+
+### Create community post - logged in user
+# @name createCommunityPost
+POST {{baseUrl}}/api/community-posts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "title": "REST Client 7-a-side Match {{$timestamp}}",
+  "description": "Friendly match, bring dark and light shirts.",
+  "location": "Bangkok QA Arena",
+  "matchDate": "2026-06-05",
+  "startTime": "19:00",
+  "endTime": "21:00",
+  "playersNeeded": 2,
+  "skillLevel": "casual"
+}
+
+### Public list community posts
+GET {{baseUrl}}/api/community-posts
+
+### Public list with filters
+GET {{baseUrl}}/api/community-posts?skillLevel=casual&status=open&search=Bangkok
+
+### Public get community post by id
+GET {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}
+
+### Update own/admin community post
+PATCH {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "description": "Friendly match, updated note: arrive 15 minutes early."
+}
+
+### Try to join own post - should return 400
+POST {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}/join
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "message": "Owner should not be able to join own post."
+}
+
+### Join community post - another logged in user
+# @name joinPost
+POST {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}/join
+Content-Type: application/json
+Authorization: Bearer {{memberLogin.response.body.token}}
+
+{
+  "message": "I can play wing and bring a ball."
+}
+
+### Duplicate join request - should return 409
+POST {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}/join
+Content-Type: application/json
+Authorization: Bearer {{memberLogin.response.body.token}}
+
+{
+  "message": "Trying again should fail."
+}
+
+### Get my community posts - logged in user
+GET {{baseUrl}}/api/community-posts/my-posts
+Authorization: Bearer {{login.response.body.token}}
+
+### Get join requests for post - owner/admin only
+GET {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}/join-requests
+Authorization: Bearer {{login.response.body.token}}
+
+### Accept join request - owner/admin only
+PATCH {{baseUrl}}/api/join-requests/{{joinPost.response.body._id}}/accept
+Authorization: Bearer {{login.response.body.token}}
+
+### Close community post instead of deleting document - owner/admin only
+DELETE {{baseUrl}}/api/community-posts/{{createCommunityPost.response.body._id}}
+Authorization: Bearer {{login.response.body.token}}

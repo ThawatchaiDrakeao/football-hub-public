@@ -1,0 +1,78 @@
+@baseUrl = http://localhost:5000
+@email = fong@test.com
+@password = 123456
+
+# Optional manual test:
+# Create a product first, then replace this with the product _id if you do not use createProduct below.
+# @productId = replace_with_created_product_id
+
+### Login
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Create product for order test - admin only
+# @name createProduct
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "REST Client Order Football {{$timestamp}}",
+  "description": "Football created only for order API testing.",
+  "price": 790,
+  "category": "ball",
+  "brand": "Adidas",
+  "stock": 5,
+  "images": ["https://example.com/football.jpg"]
+}
+
+### Create order - logged in user
+# @name createOrder
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "items": [
+    {
+      "product": "{{createProduct.response.body._id}}",
+      "quantity": 2,
+      "size": "5"
+    }
+  ],
+  "paymentMethod": "mock",
+  "shippingAddress": {
+    "fullName": "Fong",
+    "phone": "0800000000",
+    "address": "123 Football Street",
+    "province": "Bangkok",
+    "postalCode": "10110"
+  }
+}
+
+### Get my orders - logged in user
+GET {{baseUrl}}/api/orders/my-orders
+Authorization: Bearer {{login.response.body.token}}
+
+### Get order by id - owner or admin
+GET {{baseUrl}}/api/orders/{{createOrder.response.body._id}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Get all orders - admin only
+GET {{baseUrl}}/api/orders
+Authorization: Bearer {{login.response.body.token}}
+
+### Update order status - admin only
+PATCH {{baseUrl}}/api/orders/{{createOrder.response.body._id}}/status
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "status": "paid"
+}

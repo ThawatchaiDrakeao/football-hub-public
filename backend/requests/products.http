@@ -1,0 +1,60 @@
+@baseUrl = http://localhost:5000
+@email = fong@test.com
+@password = 123456
+
+# Optional manual test:
+# After creating a product, you can copy its _id here and replace route variables manually.
+# @productId = replace_with_created_product_id
+
+### Login as admin
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Create product - admin only
+# @name createProduct
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "REST Client Football Boots {{$timestamp}}",
+  "description": "Lightweight football boots for speed and control.",
+  "price": 2990,
+  "category": "shoes",
+  "brand": "Nike",
+  "sizes": ["40", "41", "42", "43"],
+  "stock": 12,
+  "images": ["https://example.com/boots.jpg"]
+}
+
+### Get active products
+GET {{baseUrl}}/api/products
+
+### Filter products by category
+GET {{baseUrl}}/api/products?category=shoes
+
+### Search products by name
+GET {{baseUrl}}/api/products?search=Football
+
+### Get product by id
+GET {{baseUrl}}/api/products/{{createProduct.response.body._id}}
+
+### Update product - admin only
+PATCH {{baseUrl}}/api/products/{{createProduct.response.body._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "price": 2790,
+  "stock": 8
+}
+
+### Soft delete product - admin only
+DELETE {{baseUrl}}/api/products/{{createProduct.response.body._id}}
+Authorization: Bearer {{login.response.body.token}}

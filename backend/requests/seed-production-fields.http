@@ -1,0 +1,88 @@
+@baseUrl = https://footy-hub-backend.onrender.com
+@adminEmail = fong@test.com 
+@adminPassword = 123456
+
+### Login as admin first
+# @name adminLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+### Check current production fields
+GET {{baseUrl}}/api/fields
+
+### Seed Field 1: Neon Turf Arena
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Neon Turf Arena",
+  "location": "Zone A",
+  "description": "Modern football field for casual matches, team training, and community games.",
+  "pricePerHour": 1200,
+  "fieldType": "7-a-side",
+  "images": ["https://images.unsplash.com/photo-1575361204480-aadea25e6e68"],
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "facilities": ["parking", "shower", "water", "locker"],
+  "isActive": true
+}
+
+### Seed Field 2: Apex Football Court
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Apex Football Court",
+  "location": "Zone B",
+  "description": "Compact football court designed for fast-paced games, practice sessions, and friendly tournaments.",
+  "pricePerHour": 900,
+  "fieldType": "5-a-side",
+  "images": ["https://images.unsplash.com/photo-1522778119026-d647f0596c20"],
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "facilities": ["parking", "water", "locker"],
+  "isActive": true
+}
+
+### Seed Field 3: Striker Dome
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Striker Dome",
+  "location": "Zone C",
+  "description": "Large football venue for full-team matches, competitive training, and organized league games.",
+  "pricePerHour": 1800,
+  "fieldType": "11-a-side",
+  "images": ["https://images.unsplash.com/photo-1551958219-acbc608c6377"],
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "facilities": ["parking", "shower", "water", "locker"],
+  "isActive": true
+}
+
+### Seed Field 4: Victory Pitch Club
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Victory Pitch Club",
+  "location": "Zone D",
+  "description": "Community-friendly football pitch for evening matches, team meetups, and skill development.",
+  "pricePerHour": 1300,
+  "fieldType": "7-a-side",
+  "images": ["https://images.unsplash.com/photo-1508098682722-e99c43a406b2"],
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "facilities": ["parking", "shower", "water"],
+  "isActive": true
+}

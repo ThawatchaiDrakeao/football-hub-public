@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:5000
+@email = fong@test.com
+@password = 123456
+
+# Optional manual test:
+# After creating a field, you can copy its _id here and replace route variables manually.
+# @fieldId = replace_with_created_field_id
+
+### Login as admin
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Create field - admin only
+# @name createField
+POST {{baseUrl}}/api/fields
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "REST Client Arena {{$timestamp}}",
+  "location": "Bangkok",
+  "description": "Modern 7-a-side football field with lights and locker rooms.",
+  "pricePerHour": 1200,
+  "fieldType": "7-a-side",
+  "images": ["https://example.com/field.jpg"],
+  "openTime": "10:00",
+  "closeTime": "23:00",
+  "facilities": ["parking", "shower", "water", "locker"]
+}
+
+### Get active fields
+GET {{baseUrl}}/api/fields
+
+### Filter fields by field type
+GET {{baseUrl}}/api/fields?fieldType=7-a-side
+
+### Search fields by name or location
+GET {{baseUrl}}/api/fields?search=Bangkok
+
+### Get field by id
+GET {{baseUrl}}/api/fields/{{createField.response.body._id}}
+
+### Update field - admin only
+PATCH {{baseUrl}}/api/fields/{{createField.response.body._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "pricePerHour": 1000,
+  "facilities": ["parking", "shower", "water", "locker", "cafe"]
+}
+
+### Soft delete field - admin only
+DELETE {{baseUrl}}/api/fields/{{createField.response.body._id}}
+Authorization: Bearer {{login.response.body.token}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
